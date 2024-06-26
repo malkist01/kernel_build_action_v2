@@ -1,0 +1,39 @@
+#!/bin/bash
+#
+# config and common vars
+
+# setup dir
+export maindir="$(pwd)"
+export outside="${maindir}/.."
+
+# initial env
+export ARCH="arm64"
+export SUBARCH="arm64"
+export KBUILD_BUILD_USER="nobody"
+export KBUILD_BUILD_HOST="github-action"
+export defconfig="tissot_defconfig"
+
+# setup anykernel
+if [[ -z "$ANYKERNEL_REPO" ]]; then
+  export ANYKERNEL_REPO=romiyusnandar/AnyKernel3
+fi
+if [[ -z "$NYKERNEL_REPO" ]]; then
+  export NYKERNEL_REPO=tissot-14
+fi
+
+# declare output file, add your nedded file here
+export out_dtb="${maindir}/out/arch/${ARCH}/boot/Image.gz-dtb"
+# export out_gz="${maindir}/out/arch/${ARCH}/boot/Image.gz"
+# export out_dtbo="${maindir}/out/arch/${ARCH}/boot/dtbo.img"
+
+export zipper="${outside}/zipper"
+
+# path to your defconfig
+export defconfig_file="${maindir}/arch/${ARCH}/configs/${defconfig}"
+
+export kernel_head="$(git log --pretty=format:'%h' -1)"
+export kernel_name=$(cat "${defconfig_file}" | grep "CONFIG_LOCALVERSION=" | sed 's/CONFIG_LOCALVERSION="-*//g' | sed 's/"*//g' )
+export kernel_ver="$(make kernelversion)"
+export TIME=$(date +"%y%m%d-%H%M")
+
+export zip_name="${maindir}/${SUFFIX}-${TIME}-${kernel_head}.zip"

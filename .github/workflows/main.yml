@@ -1,0 +1,139 @@
+name: Build kernel
+
+on:
+  workflow_dispatch:
+    inputs:
+      KERNEL_REPO:
+        description: "Kernel link, fill without .git at the end"
+        required: true
+      KERNEL_BRANCH:
+        description: "Branch to build"
+        required: true
+      COMPILER:
+        description: "Compiler, see environment to view supported compilers"
+        required: true
+      SUFFIX:
+        description: "Kernel name"
+        required: true
+      ANYKERNEL_REPO:
+        description: "Anykernel link"
+        required: true
+      ANYKERNEL_BRANCH:
+        description: "Anykernel branch"
+        required: false
+      KSU:
+        description: "Build with kernelsu?"
+        required: true
+        default: "true/false"
+      BOT_TOKEN:
+        description: "Telegram bot token, get from BotFather"
+        required: true
+      CHAT_ID:
+        description: "Chat id, get from your grup chat"
+        required: true
+      NOTES:
+        description: "Notes for this build"
+        required: false
+        default: "testing build"
+
+env:
+  RUN_NUM: ${{ github.run_number }}_${{ github.run_attempt }}
+  KERNEL_REPO: ${{ github.event.inputs.KERNEL_REPO }}
+  KERNEL_BRANCH: ${{ github.event.inputs.KERNEL_BRANCH }}
+  COMPILER: ${{ github.event.inputs.COMPILER }}
+  KERNEL_NAME: ${{ github.event.inputs.SUFFIX }}
+  ANYKERNEL_REPO: ${{ github.event.inputs.ANYKERNEL_REPO }}
+  ANYKERNEL_BRANCH: ${{ github.event.inputs.ANYKERNEL_BRANCH }}
+  PATCH_KSU: ${{ github.event.inputs.KSU }}
+  BOT_TOKEN: ${{ github.event.inputs.BOT_TOKEN }}
+  CHAT_ID: ${{ github.event.inputs.CHAT_ID }}
+  NOTE: ${{ github.event.inputs.NOTES }}
+  TZ: Asia/Jakarta
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:39
+
+    steps:
+        - name: checkout
+          uses: actions/checkout@master
+        - name: testing telegram connection
+          run: |
+            echo WORKFLOW_START=$(date +"%s") >> $GITHUB_ENV
+            ALT_RECIPENT=${{ github.event.inputs.TG_RECIPENT }}
+            if [ ! -z $ALT_RECIPENT ]; then
+              echo CHAT_ID="$ALT_RECIPENT" >> $GITHUB_ENV
+            fi
+        - name: start workflow
+          run: |
+            bash tg_utils.sh msg "gh $RUN_NUM: workflow started"
+        - name: init build environtment
+          run: |
+            dnf group install development-tools -y
+            dnf install llvm lld bc bison ca-certificates curl flex glibc-devel.i686 glibc-devel binutils-devel openssl python3 python2 zstd clang gcc-arm-linux-gnu dtc libxml2 libarchive openssl-devel perl tomsfastmath-devel wget xz -y
+            ln -sf "/usr/bin/python3" /usr/bin/python
+        - name: host info
+          run: |
+            if [ ! -z "$VERBOSE" ]; then
+              bash environment/tg_utils.sh msg "gh $RUN_NUM: build env initialized%nlgh $RUN_NUM: host: $(cat /etc/os-release | grep PRETTY_NAME | cut -d'=' -f2)%nlgh $RUN_NUM: free disk space: $(df --sync -BM --output=avail / | grep -v Avail)"
+            fi
+        - name: print notes
+          run: |
+            if [ ! -z "$NOTE" ]; then
+              bash environment/tg_utils.sh msg "gh $RUN_NUM: $NOTE"
+            fi
+        - name: clone kernel source
+          run: |
+            if [ ! -z "$VERBOSE" ]; then
+              bash environment/tg_utils.sh msg "gh $RUN_NUM: cloning kernel source%nlgh $RUN_NUM: repo: $KERNEL_REPO%nlgh $RUN_NUM: branch: $KERNEL_BRANCH"
+            fi
+            git clone --depth=1 --single-branch $KERNEL_REPO -b $KERNEL_BRANCH kernel
+        - name: print kernel info
+          run: |
+            cd kernel
+            source ../environment/env
+            bash ../environment/tg_utils.sh msg "gh $RUN_NUM: kernel name: ${kernel_name}%nlgh $RUN_NUM: kernel ver: ${kernel_ver}%nlgh $RUN_NUM: kernel head commit: ${kernel_head}%nlgh $RUN_NUM: defconfig: ${defconfig}"
+        - name: run compilation scripts
+          run: |
+            cd kernel
+            if [ "$PATCH_KSU" = "true" ]; then
+              bash ../environment/tg_utils.sh msg "gh $RUN_NUM: running compilation script(s): $COMPILER"
+              bash ../environment/build.sh "$COMPILER"
+              bash ../environment/tg_utils.sh msg "gh $RUN_NUM: ksu patch detected, patching..."
+              bash ../environment/ksu/apply-patches.sh
+              bash ../environment/tg_utils.sh msg "gh $RUN_NUM: running compilation script(s): $COMPILER with ksu"
+              bash ../environment/build.sh "$COMPILERS"
+            elif [ "$PATCH_KSU" = "false" ]; then
+              bash ../environment/tg_utils.sh msg "gh $RUN_NUM: running compilation script(s): $COMPILER"
+              bash ../environment/tg_utils.sh msg "gh $RUN_NUM: ksu patch disabled, building without ksu..."
+              bash ../environment/build.sh "$COMPILER"
+            fi
+
+        - name: upload
+          run: |
+            cd kernel
+            if [[ $(ls *.zip) ]]; then
+              for file in *.zip ; do
+                bash ../environment/tg_utils.sh up "${file}" "$(cat "${file}.info")"
+              done
+            fi
+            if [[ $(ls *.log) ]]; then
+              for file in *.log ; do
+                if [ -e "${file}.info" ]; then
+                  bash ../environment/tg_utils.sh up "${file}" "$(cat "${file}.info")"
+                fi
+              done
+            fi
+        - name: is fails
+          if: ${{ failure() }}
+          run: |
+            WORKFLOW_END=$(date +"%s")
+            WDIFF=$((WORKFLOW_END - WORKFLOW_START))
+            bash tg_utils.sh msg "gh $RUN_NUM: workflow failed in $((WDIFF / 60))m, $((WDIFF % 60))s"
+        - name: end of workflow
+          run: |
+            WORKFLOW_END=$(date +"%s")
+            WDIFF=$((WORKFLOW_END - WORKFLOW_START))
+            bash tg_utils.sh msg "gh $RUN_NUM: workflow ended in $((WDIFF / 60))m, $((WDIFF % 60))s"
