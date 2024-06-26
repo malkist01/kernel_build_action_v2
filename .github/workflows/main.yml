@@ -68,7 +68,7 @@ jobs:
             fi
         - name: start workflow
           run: |
-            bash tg_utils.sh msg "gh $RUN_NUM: workflow started"
+            bash environment/tg_utils.sh msg "gh $RUN_NUM: workflow started"
         - name: init build environtment
           run: |
             dnf group install development-tools -y
