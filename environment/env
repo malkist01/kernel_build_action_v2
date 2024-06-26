@@ -31,7 +31,7 @@ export zipper="${outside}/zipper"
 # path to your defconfig
 export defconfig_file="${maindir}/arch/${ARCH}/configs/${defconfig}"
 
-export kernel_head="$(git log --pretty=format:'%h' -1)"
+export kernel_head="$(git rev-parse --short HEAD)"
 export kernel_name=$(cat "${defconfig_file}" | grep "CONFIG_LOCALVERSION=" | sed 's/CONFIG_LOCALVERSION="-*//g' | sed 's/"*//g' )
 export kernel_ver="$(make kernelversion)"
 export TIME=$(date +"%y%m%d-%H%M")
