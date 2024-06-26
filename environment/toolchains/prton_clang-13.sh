@@ -3,7 +3,8 @@
 maindir="$(pwd)"
 outside="${maindir}/.."
 
-dir="${outside}/proton-clang-master"
+# put this in clang version
+dir="${outside}/proton-clang-13"
 
 case $1 in
   "setup" )
