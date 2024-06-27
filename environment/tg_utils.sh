@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# ...exists to not have ugly looking code blocks in ci lmao
+#
 
 case $1 in
   msg)

@@ -115,18 +115,23 @@ jobs:
         - name: upload
           run: |
             cd kernel
-            if [[ $(ls *.zip) ]]; then
-              for file in *.zip ; do
+
+            # Upload zip files
+            if ls *.zip 1> /dev/null 2>&1; then
+              for file in *.zip; do
                 bash ../environment/tg_utils.sh up "${file}" "$(cat "${file}.info")"
               done
             fi
-            if [[ $(ls *.log) ]]; then
-              for file in *.log ; do
+
+            # Upload log files
+            if ls *.log 1> /dev/null 2>&1; then
+              for file in *.log; do
                 if [ -e "${file}.info" ]; then
                   bash ../environment/tg_utils.sh up "${file}" "$(cat "${file}.info")"
                 fi
               done
             fi
+
         - name: is fails
           if: ${{ failure() }}
           run: |
