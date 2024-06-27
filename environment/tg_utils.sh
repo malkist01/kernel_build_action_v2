@@ -6,10 +6,9 @@ case $1 in
   msg)
     curl -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
       -d chat_id="${CHAT_ID}" \
-      -d parse_mode=Markdown \
       -d "disable_web_page_preview=true" \
       -d "parse_mode=html" \
-      -d text="$(echo "$2" | sed 's/%nl/\n/g')"
+      -d text="$(echo "$2" | sed 's/%nl/\n/g
   ;;
   up | upload)
     curl -F chat_id="${CHAT_ID}" \

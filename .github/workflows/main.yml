@@ -12,7 +12,7 @@ on:
       COMPILER:
         description: "Compiler, see environment to view supported compilers"
         required: true
-        default: "proton-clang-13"
+        default: "proton_clang-15"
       SUFFIX:
         description: "Kernel name"
         required: true
@@ -98,22 +98,22 @@ jobs:
             bash ../environment/tg_utils.sh msg "
               *action $RUN_NUM*: \`kernel name: ${kernel_name}\`
               *action $RUN_NUM*: \`kernel ver: ${kernel_ver}\`
-              *action $RUN_NUM*: \`kernel head commit: [${kernel_head}](${KERNEL_REPO}/commit/${kernel_head})\`
+              *action $RUN_NUM*: \`kernel head commit: ${kernel_head}\`
               *action $RUN_NUM*: \`defconfig: ${defconfig}\`
               "
         - name: run compilation scripts
           run: |
             cd kernel
             if [ "$PATCH_KSU" = "true" ]; then
-              bash ../environment/tg_utils.sh msg "gh $RUN_NUM: running compilation script(s): $COMPILER"
+              bash ../environment/tg_utils.sh msg "action $RUN_NUM: running compilation script(s): $COMPILER"
               bash ../environment/build.sh "$COMPILER"
-              bash ../environment/tg_utils.sh msg "gh $RUN_NUM: ksu patch detected, patching..."
+              bash ../environment/tg_utils.sh msg "action $RUN_NUM: ksu patch detected, patching..."
               bash ../environment/ksu/apply-patches.sh
-              bash ../environment/tg_utils.sh msg "gh $RUN_NUM: running compilation script(s): $COMPILER with ksu"
+              bash ../environment/tg_utils.sh msg "action $RUN_NUM: running compilation script(s): $COMPILER with ksu"
               bash ../environment/build.sh "$COMPILER"
             elif [ "$PATCH_KSU" = "false" ]; then
-              bash ../environment/tg_utils.sh msg "gh $RUN_NUM: running compilation script(s): $COMPILER"
-              bash ../environment/tg_utils.sh msg "gh $RUN_NUM: ksu patch disabled, building without ksu..."
+              bash ../environment/tg_utils.sh msg "action $RUN_NUM: running compilation script(s): $COMPILER"
+              bash ../environment/tg_utils.sh msg "action $RUN_NUM: ksu patch disabled, building without ksu..."
               bash ../environment/build.sh "$COMPILER"
             fi
 
