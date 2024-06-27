@@ -10,13 +10,14 @@ case $1 in
   "setup" )
     # Clone compiler
     if [[ ! -d "${dir}" ]]; then
-	  curl -Lo a.tar.gz "https://gitlab.com/LeCmnGend/clang/-/archive/clang-15/clang-clang-15.tar.gz"
-	  tar -zxf a.tar.gz
+      mkdir -p "${dir}"
+      curl -Lo clang-15.tar.gz "https://gitlab.com/LeCmnGend/clang/-/archive/clang-15/clang-clang-15.tar.gz"
+      tar -zxf clang-15.tar.gz -C "${dir}" --strip-components=1
     fi
   ;;
 
   "build" )
-    export PATH="${dir}/bin:/usr/bin:${PATH}"
+    export PATH="${dir}/bin:$PATH"
     make -j$(nproc --all) O=out ARCH=arm64 SUBARCH=arm64 $2
     make -j$(nproc --all) O=out \
       CROSS_COMPILE="aarch64-linux-gnu-" \
