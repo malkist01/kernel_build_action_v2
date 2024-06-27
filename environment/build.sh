@@ -8,7 +8,7 @@ source "${outside}/environment/env"
 
 pack() {
   if [ ! -d ${zipper} ]; then
-    git clone https://github.com/${ANYKERNEL_REPO} -b ${ANYKERNEL_BRANCH} "${zipper}"
+    git clone ${ANYKERNEL_REPO} -b ${ANYKERNEL_BRANCH} "${zipper}"
     cd "${zipper}" || exit 1
   else
     cd "${zipper}" || exit 1
