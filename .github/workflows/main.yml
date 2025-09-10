@@ -26,11 +26,11 @@ on:
       ANYKERNEL_BRANCH:
         description: "Anykernel branch"
         default: 'master'
-        required: false
+        required: true
       KSU:
         description: "Build with kernelsu?"
         required: true
-        default: "true/false"
+        default: "true"
       BOT_TOKEN:
         description: "Telegram bot token, get from BotFather"
         default: '7596553794:AAGoeg4VypmUfBqfUML5VWt5mjivN5-3ah8'
