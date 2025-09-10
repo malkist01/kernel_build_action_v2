@@ -1,4 +1,7 @@
+#!/usr/bin/env bash
+
 maindir="$(pwd)"
+cd kernel
 rm -rf KernelSU
 
 # integrate kernelsu-SukiSu
