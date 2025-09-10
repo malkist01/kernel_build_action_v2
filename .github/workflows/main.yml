@@ -5,9 +5,11 @@ on:
     inputs:
       KERNEL_REPO:
         description: "Kernel link, fill without .git at the end"
+        default: 'https://github.com/malkist01/Teletubies-mid.git'
         required: true
       KERNEL_BRANCH:
         description: "Branch to build"
+        default: 'SukiSU'
         required: true
       COMPILER:
         description: "Compiler, see environment to view supported compilers"
@@ -15,12 +17,15 @@ on:
         default: "proton_clang-15"
       SUFFIX:
         description: "Kernel name"
+        default: 'TeletubiesSukiSU'
         required: true
       ANYKERNEL_REPO:
         description: "Anykernel link"
+        default: 'https://github.com/malkist01/anykernel3.git'
         required: true
       ANYKERNEL_BRANCH:
         description: "Anykernel branch"
+        default: 'master'
         required: false
       KSU:
         description: "Build with kernelsu?"
@@ -28,9 +33,11 @@ on:
         default: "true/false"
       BOT_TOKEN:
         description: "Telegram bot token, get from BotFather"
+        default: '7596553794:AAGoeg4VypmUfBqfUML5VWt5mjivN5-3ah8'
         required: true
       CHAT_ID:
         description: "Chat id, get from your grup chat"
+        default: '-1002287610863'
         required: true
       NOTES:
         description: "Notes for this build"
